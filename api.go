@@ -7,6 +7,7 @@ import (
 	"log/syslog"
 	"net/http"
 	"os"
+	"os/exec"
 )
 
 func uploadModule(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +44,12 @@ func uploadModule(w http.ResponseWriter, r *http.Request) {
 		logger.Err(fmt.Sprintf("Error Reading File: %+v", err))
 	}
 	moduleFile.Write(fileBytes)
+	
+	cmd := exec.Command("./nmp/nmp")
+	cmd.Stdout = os.Stdout
+	if err := cmd.Run(); err != nil {
+		logger.Err(fmt.Sprintf("Error Running NMP: %+v", err))
+	}
 }
 
 func setupRoutes() {
