@@ -1,3 +1,3 @@
 module github.com/simonjcarr/spmon-client
 
-go 1.21.1
+go 1.21
