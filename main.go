@@ -5,7 +5,9 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 )
 
 
@@ -50,6 +52,18 @@ func startUDPServer() {
 
 	fmt.Println("UDP server listening on", addr)
 
+
+	// Handle SIGINT signal to gracefully close the UDP connection
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt, syscall.SIGINT)
+
+	go func() {
+			<-sigint
+			fmt.Println("Received SIGINT signal, closing UDP connection...")
+			conn.Close()
+			os.Exit(0)
+	}()
+
 	for {
 			buf := make([]byte, 1024)
 			n, addr, err := conn.ReadFromUDP(buf)
@@ -58,5 +72,6 @@ func startUDPServer() {
 					continue
 			}
 			fmt.Printf("Received %d bytes from %s: %s\n", n, addr, string(buf[:n]))
+			go sendToApp(buf)
 	}
 }
